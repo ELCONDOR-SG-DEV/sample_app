@@ -24,3 +24,7 @@ server = app.server
 
 if __name__ == '__main__':
     app.run(debug=False)
+
+
+#linux-webapps-Elcondor-m0015-x
+#gunicorn -w 4 -b :8000 app:server

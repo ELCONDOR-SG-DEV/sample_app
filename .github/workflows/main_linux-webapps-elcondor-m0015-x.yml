@@ -66,4 +66,4 @@ jobs:
         with:
           app-name: 'linux-webapps-Elcondor-m0015-x'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_300D2A1A707047E5B0259D523C2FA7DC }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F5CC55C259DF4F4A85A1DCD5456B26F1 }}

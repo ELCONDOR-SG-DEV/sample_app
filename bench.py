@@ -205,7 +205,7 @@ def main():
     '''
     from concurrent.futures import ThreadPoolExecutor, as_completed
     def update_data_multiprocess_master_2(item_list, scenario):
-        psicontainer[scenario].save('FY24 9F_TEST-FINANCIAL_before.elc')
+        psicontainer[scenario].save('FY24_9F_TEST-FINANCIAL_before.elc')
         # バッチサイズを50に設定
         batch_size = 50
         #batches = [item_list[i:i + batch_size] for i in range(0, len(item_list), batch_size)]
@@ -224,7 +224,7 @@ def main():
         for t in threads:
             t.join()
 
-        psicontainer[scenario].save('FY24 9F_TEST-FINANCIAL_after.elc')
+        psicontainer[scenario].save('FY24_9F_TEST-FINANCIAL_after.elc')
     '''
     end of update_data_multiprocess_master_2
     '''

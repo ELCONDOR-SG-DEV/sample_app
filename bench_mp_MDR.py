@@ -15,6 +15,29 @@ import pickle
 from multiprocessing import Process, Pool, Manager, Value, freeze_support
 from utils.data_connection import  db_data, psicontainer, db2_data,global_progress,preprocess_data, get_db_data
 from utils.login_handler import require_login
+import subprocess
+
+
+def get_cpu_name():
+    try:
+        # Execute the command to get CPU name
+        result = subprocess.run(['wmic', 'cpu', 'get', 'name'], capture_output=True, text=True)
+        if result.returncode == 0 and result.stdout:
+            # Split the output into lines and remove any empty lines
+            lines = [line.strip() for line in result.stdout.strip().split('\n') if line.strip()]
+            # Check if there is more than one line (first line is usually the header)
+            if len(lines) > 1:
+                return lines[1]  # Return the second line which should be the CPU name
+    except Exception as e:
+        print(f"Failed to get CPU name: {e}")
+
+    return "CPU name not available"
+
+def print_system_info():
+    cpu_name = get_cpu_name()
+    total_memory = psutil.virtual_memory().total / (1024 ** 3)  # Convert from bytes to GB
+    print(f"Processor (CPU) Name: {cpu_name}")
+    print(f"Total System Memory: {total_memory:.2f} GB")
 
 class ResourceMonitor(threading.Thread):
     def __init__(self, interval=1):
@@ -127,6 +150,7 @@ def main():
     end_time = time.time()
     elapsed_time = end_time - start_time
     print(f"update_data_multiprocess_master_2 completed in {elapsed_time:.2f} seconds.")
+    print_system_info()
 
 if __name__ == '__main__':
     freeze_support()

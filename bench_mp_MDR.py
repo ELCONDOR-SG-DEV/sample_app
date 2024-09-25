@@ -17,12 +17,11 @@ from utils.data_connection import  db_data, psicontainer, db2_data,global_progre
 from utils.login_handler import require_login
 
 class ResourceMonitor(threading.Thread):
-    def __init__(self, interval=2):
+    def __init__(self, interval=1):
         super().__init__()
         self.interval = interval
-        self.total_cpu = 0
-        self.total_memory = 0
-        self.count = 0
+        self.peak_cpu = 0
+        self.peak_memory = 0
         self.running = True
         # Capture initial system resources usage
         self.initial_cpu = psutil.cpu_percent(interval=None)
@@ -30,26 +29,27 @@ class ResourceMonitor(threading.Thread):
 
     def run(self):
         while self.running:
-            self.total_cpu += psutil.cpu_percent(interval=1)
-            self.total_memory += psutil.virtual_memory().used / (1024 ** 2)  # MB
-            self.count += 1
+            current_cpu = psutil.cpu_percent(interval=1)
+            current_memory = psutil.virtual_memory().used / (1024 ** 2)  # Current memory usage in MB
+
+            # Update peak values if current usage is higher than previously recorded peak
+            if current_cpu > self.peak_cpu:
+                self.peak_cpu = current_cpu
+            if current_memory > self.peak_memory:
+                self.peak_memory = current_memory
+
             time.sleep(self.interval)
 
     def stop(self):
         self.running = False
 
-    def get_average_usage(self):
-        if self.count > 0:
-            avg_cpu = self.total_cpu / self.count
-            avg_memory = self.total_memory / self.count
-            return avg_cpu, avg_memory
-        else:
-            return 0, 0
+    def get_peak_usage(self):
+        return self.peak_cpu, self.peak_memory
 
     def calculate_additional_load(self):
-        avg_cpu, avg_memory = self.get_average_usage()
-        additional_cpu_load = avg_cpu - self.initial_cpu
-        additional_memory_load = avg_memory - self.initial_memory
+        peak_cpu, peak_memory = self.get_peak_usage()
+        additional_cpu_load = peak_cpu - self.initial_cpu
+        additional_memory_load = peak_memory - self.initial_memory
         return additional_cpu_load, additional_memory_load
 
 def process_batch(batch, scenario):

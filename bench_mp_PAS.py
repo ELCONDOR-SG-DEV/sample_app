@@ -144,27 +144,44 @@ from utils.data_connection import  db_data, psicontainer, db2_data,global_progre
 from utils.login_handler import require_login
 import subprocess
 
-
-def get_cpu_name():
+def get_cpu_name_windows():
     try:
-        # Execute the command to get CPU name
+        # Use WMIC command on Windows
         result = subprocess.run(['wmic', 'cpu', 'get', 'name'], capture_output=True, text=True)
         if result.returncode == 0 and result.stdout:
-            # Split the output into lines and remove any empty lines
             lines = [line.strip() for line in result.stdout.strip().split('\n') if line.strip()]
-            # Check if there is more than one line (first line is usually the header)
             if len(lines) > 1:
-                return lines[1]  # Return the second line which should be the CPU name
+                return lines[1]  # Assuming the CPU name is on the second line
     except Exception as e:
-        print(f"Failed to get CPU name: {e}")
-
+        print(f"Failed to get CPU name (Windows): {e}")
     return "CPU name not available"
+
+def get_cpu_name_linux():
+    try:
+        # Use /proc/cpuinfo on Linux
+        with open('/proc/cpuinfo', 'r') as f:
+            for line in f:
+                if "model name" in line:
+                    return line.split(':')[1].strip()
+    except Exception as e:
+        print(f"Failed to get CPU name (Linux): {e}")
+    return "CPU name not available"
+
+def get_cpu_name():
+    if platform.system() == 'Windows':
+        return get_cpu_name_windows()
+    elif platform.system() == 'Linux':
+        return get_cpu_name_linux()
+    else:
+        return "Unsupported operating system"
 
 def print_system_info():
     cpu_name = get_cpu_name()
     total_memory = psutil.virtual_memory().total / (1024 ** 3)  # Convert from bytes to GB
     print(f"Processor (CPU) Name: {cpu_name}")
     print(f"Total System Memory: {total_memory:.2f} GB")
+
+
 
 class ResourceMonitor(threading.Thread):
     def __init__(self, interval=1):
